@@ -1,6 +1,6 @@
-lexer: 
+lexer: supl.lex
 	flex supl.lex
-	gcc -o lexer lex.yy.c -lfl
+	gcc -o lexer lex.yy.c -ll
 
 test:
 	./lexer test.su
