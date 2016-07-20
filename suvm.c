@@ -137,6 +137,7 @@ void execute(void)
             case opDiv: r = a / b; break;
             case opMod: r = a % b; break;
             case opPow: r = powl(a, b); break;
+            default:;
           }
 
           push_value(operands, r);
@@ -250,6 +251,7 @@ void execute(void)
               case opJeq: flag = a == b; break;
               case opJle: flag = a <= b; break;
               case opJlt: flag = a <  b; break;
+              default:;
             }
           }
 

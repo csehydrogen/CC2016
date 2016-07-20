@@ -52,11 +52,11 @@ int yycolumn = 1;
 "<"       { return CMPL; }
 ">="      { return CMPGE; }
 ">"       { return CMPG; }
-"&&"       { return AND; }
-"||"       { return OR; }
+"&&"      { return AND; }
+"||"      { return OR; }
 [[:digit:]]+  { yylval.n = atoi(yytext); return NUMBER; }
 [[:alpha:]][[:alnum:]]* { yylval.str = strdup(yytext); return IDENT; }
-"\""([[:print:]]{-}["\\]|"\\t"|"\\n"|"\\\""|"\\\\")*"\"" { return STRING; }
+"\""([[:print:]]{-}["\\]|"\\t"|"\\n"|"\\\""|"\\\\")*"\"" { yylval.str = strdup(yytext); return STRING; }
 [ \t]+  /* ignore whitespace */
 [\n]+   { yycolumn = 1; }
 .       /* undefined */

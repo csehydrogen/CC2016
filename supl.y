@@ -27,7 +27,7 @@ int yyerror(const char *msg);
 }
 
 %union {
-  long int n;
+  int n;
   char     *str;
   IDlist   *idl;
   EType    t;
@@ -40,6 +40,7 @@ int yyerror(const char *msg);
 
   char *fn_pfx   = NULL;
   EType rettype  = tVoid;
+  Funclist *funcl = NULL;
 }
 
 %start program
@@ -60,9 +61,9 @@ int yyerror(const char *msg);
 %left MUL DIV MOD
 %right EXP
 
-%type<n>    NUMBER
-%type<str>  ident IDENT
-%type<idl>  vardecl vardecl0
+%type<n>    number NUMBER vardecl fundecl0 call0 call1
+%type<str>  ident IDENT string STRING
+%type<idl>  vardecl0
 %type<t>    type
 
 %%
@@ -95,9 +96,6 @@ program:
 decll:
   %empty
 | decll vardecl SEMICOLON
-  {
-    free_idlist($vardecl);
-  }
 | decll fundecl
 ;
 
@@ -105,18 +103,24 @@ vardecl:
   type
   vardecl0
   {
+    if ($type == tVoid) {
+      yyerror("Variable cannot be declared as type 'void'.");
+      YYABORT;
+    }
     IDlist *l = $vardecl0;
-    while (l) {
+    int narg = 0;
+    for (; l; ++narg) {
       if (insert_symbol(symtab, l->id, $type) == NULL) {
         char *error = NULL;
-        asprintf(&error, "Duplicated identifier '%s'.", l->id);
+        asprintf(&error, "Duplicated variable identifier '%s'.", l->id);
         yyerror(error);
         free(error);
         YYABORT;
       }
       l = l->next;
     }
-    $$ = $vardecl0;
+    delete_idlist($vardecl0);
+    $$ = narg;
   }
 ;
 
@@ -140,11 +144,56 @@ type:
 ;
 
 fundecl:
-  type ident LPAREN fundecl0 RPAREN stmtblock
+  type ident
+  {
+    if (find_func(funcl, $ident) != NULL) {
+      char *error = NULL;
+      asprintf(&error, "Duplicated function identifier '%s'.", $ident);
+      yyerror(error);
+      free(error);
+      YYABORT;
+    }
+    cb = init_codeblock($ident);
+    stack = init_stack(stack);
+    symtab = init_symtab(stack, symtab);
+    rettype = $type;
+  }
+  LPAREN fundecl0 RPAREN
+  {
+    Funclist *l = (Funclist*)calloc(1, sizeof(Funclist));
+    l->id = $ident;
+    l->rettype = $type;
+    l->narg = $fundecl0;
+    l->next = funcl;
+    funcl = l;
+  }
+  stmtblock
+  {
+    dump_codeblock(cb);
+    save_codeblock(cb, fn_pfx);
+    Stack *pstck = stack;
+    stack = stack->uplink;
+    delete_stack(pstck);
+    Symtab *pst = symtab;
+    symtab = symtab->parent;
+    delete_symtab(pst);
+  }
+;
 
-fundecl0: %empty | vardecl;
+fundecl0: %empty { $$ = 0; } | vardecl;
 
-stmtblock: LBRACE stmtblock0 RBRACE;
+stmtblock:
+  LBRACE
+  {
+    symtab = init_symtab(stack, symtab);
+  }
+  stmtblock0
+  {
+    Symtab *pst = symtab;
+    symtab = symtab->parent;
+    delete_symtab(pst);
+  }
+  RBRACE;
 
 stmtblock0: %empty | stmtblock0 stmt;
 
@@ -160,7 +209,18 @@ stmt:
 | print
 ;
 
-assign: ident ASSIGN expression;
+assign: ident ASSIGN expression
+  {
+    Symbol *sym = find_symbol(symtab, $ident, sGlobal);
+    if (sym == NULL) {
+      char *error = NULL;
+      asprintf(&error, "Unknown identifier '%s'.", $ident);
+      yyerror(error);
+      free(error);
+      YYABORT;
+    }
+  }
+;
 
 if: IF LPAREN condition RPAREN stmtblock if0;
 
@@ -168,15 +228,49 @@ if0: %empty | ELSE stmtblock;
 
 while: WHILE LPAREN condition RPAREN stmtblock;
 
-call: ident LPAREN call0 RPAREN;
+call:
+  ident LPAREN call0 RPAREN
+  {
+    Funclist *l = find_func(funcl, $ident);
+    if (l == NULL) {
+      char *error = NULL;
+      asprintf(&error, "Function '%s' does not exist.", $ident);
+      yyerror(error);
+      free(error);
+      YYABORT;
+    }
+    if (l->narg != $call0) {
+      char *error = NULL;
+      asprintf(&error, "The number of arguments(%d) does not match with function declaration(%d).", $call0, l->narg);
+      yyerror(error);
+      free(error);
+      YYABORT;
+    }
+  }
+;
 
-call0: %empty | call1;
+call0: %empty { $$ = 0; } | call1;
 
-call1: expression | call1 COMMA expression;
+call1:
+  expression { $$ = 1; }
+| call1 COMMA expression { $$ = $1 + 1; }
+;
 
-return: RETURN return0 SEMICOLON;
-
-return0: %empty | expression;
+return:
+  RETURN SEMICOLON
+  {
+    if (rettype != tVoid) {
+      yyerror("Return value is expected.");
+      YYABORT;
+    }
+  }
+| RETURN expression SEMICOLON
+  {
+    if (rettype == tVoid) {
+      yyerror("Function must not have return value.");
+      YYABORT;
+    }
+  }
 
 read: READ ident SEMICOLON;
 

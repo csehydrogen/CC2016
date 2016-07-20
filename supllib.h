@@ -302,6 +302,8 @@ Oplist* add_backpatch(Oplist *list, Operation *op);
 /// @param bpr backpatch record
 void delete_backpatchlist(BPrecord *bpr);
 
+void dump_operation(Operation *op);
+
 /// @brief print codeblock in human-readable form to stdout
 /// @param cb codeblock to print
 void dump_codeblock(CodeBlock *cb);

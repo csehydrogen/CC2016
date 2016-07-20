@@ -14,6 +14,7 @@
 
 #include "supllib.h"
 
+#define DBG_FUNC    0
 #define DBG_SYMTAB  0
 #define DBG_STACK   0
 #define DBG_CODEBLK 0
@@ -36,13 +37,15 @@ void delete_idlist(IDlist *l)
 Funclist* find_func(Funclist *fl, const char *id)
 {
   Funclist *f = fl;
-  printf("find_func: searching for '%s'...\n", id);
+  if (DBG_FUNC) printf("find_func: searching for '%s'...\n", id);
   while ((f != NULL) && (strcmp(id, f->id) != 0)) {
-    printf("  '%s': nope\n", f->id);
+    if (DBG_FUNC) printf("  '%s': nope\n", f->id);
     f = f->next;
   }
-  if (f != NULL) printf("  found: '%s'\n", f->id);
-  else printf("  not found.\n");
+  if (DBG_FUNC) {
+    if (f != NULL) printf("  found: '%s'\n", f->id);
+    else printf("  not found.\n");
+  }
   return f;
 }
 
@@ -606,6 +609,7 @@ void save_operation(FILE *f, Operation *op, Strtab *st)
       // operand is an offset into the string table
       operand = add_string(st, (char*)op->operand);
       break;
+    default:;
   }
 
   // write opcode & operand
