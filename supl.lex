@@ -59,6 +59,6 @@ int yycolumn = 1;
 "\""([[:print:]]{-}["\\]|"\\t"|"\\n"|"\\\""|"\\\\")*"\"" { yylval.str = strdup(yytext); return STRING; }
 [ \t]+  /* ignore whitespace */
 [\n]+   { yycolumn = 1; }
-.       /* undefined */
+.       { printf("undefined: %c\n", yytext[0]); } /* undefined */
 
 %%
