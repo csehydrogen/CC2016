@@ -174,6 +174,7 @@ fundecl:
     l->narg = narg;
     l->next = funcl;
     funcl = l;
+    delete_idlist($fundecl0);
   }
   stmtblock
   {
