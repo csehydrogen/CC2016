@@ -55,8 +55,8 @@ int yycolumn = 1;
 "&&"      { return AND; }
 "||"      { return OR; }
 [[:digit:]]+  { yylval.n = atoi(yytext); return NUMBER; }
-[[:alpha:]][[:alnum:]]* { yylval.str = strdup(yytext); return IDENT; }
-"\""([[:print:]]{-}["\\]|"\\t"|"\\n"|"\\\""|"\\\\")*"\"" { yylval.str = strdup(yytext); return STRING; }
+[[:alpha:]][_[:alnum:]]* { yylval.str = strdup(yytext); return IDENT; }
+"\""([\x1B[:print:]]{-}["\\]|"\\t"|"\\n"|"\\\""|"\\\\")*"\"" { yylval.str = strdup(yytext); return STRING; }
 [ \t]+  /* ignore whitespace */
 [\n]+   { yycolumn = 1; }
 .       { printf("undefined: %c\n", yytext[0]); } /* undefined */

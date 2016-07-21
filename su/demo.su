@@ -1,0 +1,43 @@
+void pRed(int n) { print "[41m"; while (0 < n) { print " "; n = n - 1; } }
+void pWhite(int n) { print "[47m"; while (0 < n) { print " "; n = n - 1; } }
+void pLF() { print "[49m\n"; }
+void main() {
+  int n, m;
+  print "n = ? ";
+  read n;
+
+  m = n;
+  while (0 < m) {
+    m = m - 1;
+    pRed(15 * n); pLF();
+  }
+
+  m = n;
+  while (0 < m) {
+    m = m - 1;
+    pRed(6 * n); pWhite(3 * n); pRed(6 * n); pLF();
+  }
+
+  m = n;
+  while (0 < m) {
+    m = m - 1;
+    pRed(3 * n); pWhite(9 * n); pRed(3 * n); pLF();
+  }
+
+  m = n;
+  while (0 < m) {
+    m = m - 1;
+    pRed(6 * n); pWhite(3 * n); pRed(6 * n); pLF();
+  }
+
+  m = n;
+  while (0 < m) {
+    m = m - 1;
+    pRed(15 * n); pLF();
+  }
+}
+{
+  while (0 == 0) {
+    main();
+  }
+}

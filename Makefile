@@ -31,5 +31,8 @@ suvm: suvm.o supllib.o
 %.run: %.sux suvm
 	./suvm $< | tee $@
 
+%.res: %.sux suvm
+	./suvm $<
+
 clean:
 	rm -f supl.tab.* lex.yy.c *.o suplc suvm *.sux *.run .depend

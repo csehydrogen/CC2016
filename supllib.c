@@ -397,7 +397,7 @@ CodeBlock* init_codeblock(const char *label)
 {
   CodeBlock *cb = (CodeBlock*)calloc(1, sizeof(CodeBlock));
   cb->label = label;
-  cb->elem = 64;
+  cb->elem = 256;
   resize_codeblock(cb);
 
   return cb;

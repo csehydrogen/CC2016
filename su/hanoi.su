@@ -1,0 +1,119 @@
+int n, a0, a1, a2, z;
+int l10(int x) {
+  int y;
+  y = 0;
+  while (0 < x) {
+    y = y + 1;
+    x = x / 10;
+  }
+  return y;
+}
+int get(int x) {
+  if (x == 0) { return a0; }
+  if (x == 1) { return a1; }
+  if (x == 2) { return a2; }
+}
+void set(int x, y) {
+  if (x == 0) { a0 = y; }
+  if (x == 1) { a1 = y; }
+  if (x == 2) { a2 = y; }
+}
+int pop(int x) {
+  int y;
+  y = get(x);
+  set(x, y / 10);
+  return y % 10;
+}
+void push(int x, v) {
+  set(x, get(x) * 10 + v);
+}
+void pDigit(int x) {
+  if (x == 0) { print "0"; return; }
+  if (x == 1) { print "1"; return; }
+  if (x == 2) { print "2"; return; }
+  if (x == 3) { print "3"; return; }
+  if (x == 4) { print "4"; return; }
+  if (x == 5) { print "5"; return; }
+  if (x == 6) { print "6"; return; }
+  if (x == 7) { print "7"; return; }
+  if (x == 8) { print "8"; return; }
+  if (x == 9) { print "9"; return; }
+}
+void pInt(int x) {
+  if (x == 0) { print "0"; return; }
+  int y;
+  y = 1;
+  while (y <= x) { y = y * 10; }
+  y = y / 10;
+  while (0 < y) {
+    pDigit(x / y);
+    x = x % y;
+    y = y / 10;
+  }
+}
+void p(int c, n) {
+  print "[";
+  pInt(c);
+  print "m";
+  while (0 < n) {
+    n = n - 1;
+    print " ";
+  }
+}
+void pHanoi() {
+  print "[2J[1;1H";
+  int i, j, k, b0, b1, b2;
+  b0 = a0; b1 = a1; b2 = a2;
+  i = n;
+  while (0 < i) {
+    j = 0;
+    while (j < 3) {
+      k = 0;
+      if (i <= l10(get(j))) {
+        k = get(j) % 10;
+        set(j, get(j) / 10);
+      }
+      p(49, ((n * 2 + 5) - (k * 2 + 1)) / 2);
+      p(41 + k % 6, (k * 2 + 1));
+      p(49, ((n * 2 + 5) - (k * 2 + 1)) / 2);
+      j = j + 1;
+    }
+    print "[0m\n";
+    i = i - 1;
+  }
+  j = 0;
+  while (j < 3) {
+    k = n + 1;
+    p(49, ((n * 2 + 5) - (k * 2 + 1)) / 2);
+    p(47, (k * 2 + 1));
+    p(49, ((n * 2 + 5) - (k * 2 + 1)) / 2);
+    j = j + 1;
+  }
+  print "[0m\n";
+  a0 = b0; a1 = b1; a2 = b2;
+
+  print "Continue...";
+  read z;
+}
+void hanoi(int n, s, d) {
+  if (1 < n) { hanoi(n - 1, s, 3 - s - d); }
+  push(d, pop(s));
+  pHanoi();
+  if (1 < n) { hanoi(n - 1, 3 - s - d, d); }
+}
+{
+  print "n = ? ";
+  read n;
+
+  a0 = 0; a1 = 0; a2 = 0;
+  int i, j;
+  i = n; j = n;
+  while (0 < i) {
+    i = i - 1;
+    a0 = a0 * 10 + j;
+    j = j - 1;
+  }
+
+  pHanoi();
+  hanoi(n, 0, 2);
+}
